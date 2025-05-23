@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedAnomNet - Medical Anomaly Detection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .heatmap-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        .tab-active {
+            color: #3b82f6;
+            border-bottom: 2px solid #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <svg class="h-8 w-8 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19.5 8.25l-7.5 7.5-7.5-7.5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span class="ml-2 text-xl font-bold text-gray-800">MedAnomNet</span>
+                    </div>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:items-center space-x-8">
+                    <a href="#home" class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" id="nav-home">Home</a>
+                    <a href="#try-it" class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" id="nav-try">Try It Now</a>
+                    <a href="#about" class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" id="nav-about">About</a>
+                    <a href="#contact" class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" id="nav-contact">Contact</a>
+                </div>
+                <div class="flex items-center sm:hidden">
+                    <button type="button" class="mobile-menu-button inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500">
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div class="hidden mobile-menu sm:hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="#home" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">Home</a>
+                <a href="#try-it" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">Try It Now</a>
+                <a href="#about" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">About</a>
+                <a href="#contact" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Home Section -->
+    <section id="home" class="pt-16 pb-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:flex lg:items-center lg:justify-between">
+                <div class="lg:w-1/2 lg:pr-12">
+                    <h1 class="text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">
+                        MedAnomNet: <span class="text-blue-600">Hybrid Multi-Modal Anomaly Detection</span>
+                    </h1>
+                    <p class="mt-6 text-xl text-gray-500">
+                        A deep learning-based framework for analyzing Brain MRI, Liver CT, and Chest X-ray images to enhance diagnostic accuracy.
+                    </p>
+                    <div class="mt-10 flex gap-4">
+                        <a href="#try-it" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white gradient-bg hover:opacity-90 transition-all">
+                            Try It Now
+                        </a>
+                        <a href="#about" class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-all">
+                            Learn More
+                        </a>
+                    </div>
+                    <div class="mt-8 flex items-center">
+                        <div class="flex -space-x-2">
+                            <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-100 text-green-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                            </div>
+                            <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-purple-100 text-purple-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <span class="ml-4 text-sm text-gray-500">Research project from Amrita University</span>
+                    </div>
+                </div>
+                <div class="mt-10 lg:mt-0 lg:w-1/2">
+                    <div class="relative rounded-lg overflow-hidden shadow-xl">
+                        <svg class="w-full" viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="600" height="400" fill="#e2e8f0" />
+                            <rect x="50" y="50" width="500" height="300" rx="10" fill="#f8fafc" />
+                            <circle cx="300" cy="200" r="120" fill="#e2e8f0" />
+                            <path d="M300,80 C364.7,80 420,135.3 420,200 C420,264.7 364.7,320 300,320 C235.3,320 180,264.7 180,200 C180,135.3 235.3,80 300,80 Z" fill="none" stroke="#3b82f6" stroke-width="3" />
+                            <circle cx="300" cy="200" r="60" fill="#bfdbfe" />
+                            <circle cx="300" cy="200" r="30" fill="#3b82f6" />
+                            <rect x="70" y="70" width="100" height="20" rx="5" fill="#cbd5e1" />
+                            <rect x="70" y="100" width="80" height="20" rx="5" fill="#cbd5e1" />
+                            <rect x="70" y="280" width="120" height="20" rx="5" fill="#cbd5e1" />
+                            <rect x="70" y="310" width="90" height="20" rx="5" fill="#cbd5e1" />
+                            <rect x="430" y="70" width="100" height="20" rx="5" fill="#cbd5e1" />
+                            <rect x="450" y="100" width="80" height="20" rx="5" fill="#cbd5e1" />
+                            <rect x="410" y="280" width="120" height="20" rx="5" fill="#cbd5e1" />
+                            <rect x="440" y="310" width="90" height="20" rx="5" fill="#cbd5e1" />
+                            <circle cx="240" cy="140" r="15" fill="#ef4444" opacity="0.7" />
+                            <circle cx="350" cy="260" r="20" fill="#ef4444" opacity="0.7" />
+                            <circle cx="380" cy="170" r="10" fill="#ef4444" opacity="0.7" />
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="text-center">
+                                <div class="text-lg font-medium text-gray-900">Medical Imaging Analysis</div>
+                                <div class="text-sm text-gray-600">Powered by Deep Learning</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-24">
+                <h2 class="text-center text-3xl font-bold text-gray-900">Key Features</h2>
+                <div class="mt-12 grid gap-8 md:grid-cols-3">
+                    <div class="bg-white p-6 rounded-lg shadow-md card-hover transition-all">
+                        <div class="h-12 w-12 rounded-md gradient-bg flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <h3 class="mt-4 text-lg font-medium text-gray-900">Multi Support</h3>
+                        <p class="mt-2 text-gray-600">Analyze Brain MRI, Liver CT, and Chest X-ray images with a single unified interface.</p>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-lg shadow-md card-hover transition-all">
+                        <div class="h-12 w-12 rounded-md gradient-bg flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                            </svg>
+                        </div>
+                        <h3 class="mt-4 text-lg font-medium text-gray-900">Disease Classification</h3>
+                        <p class="mt-2 text-gray-600">Detect and classify diseases including Glioma, Meningioma, Pituitary tumors, COVID-19, and Pneumonia.</p>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-lg shadow-md card-hover transition-all">
+                        <div class="h-12 w-12 rounded-md gradient-bg flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                        </div>
+                        <h3 class="mt-4 text-lg font-medium text-gray-900">Anomaly Localization</h3>
+                        <p class="mt-2 text-gray-600">Visualize abnormal regions with heatmaps to aid medical professionals in decision-making.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Try It Now Section -->
+    <section id="try-it" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-gray-900">Try MedAnomNet Now</h2>
+                <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+                    Upload your medical image and get instant anomaly detection results with our AI-powered analysis.
+                </p>
+            </div>
+            
+            <div class="mt-12 bg-gray-50 rounded-lg shadow-md overflow-hidden">
+                <div class="p-6">
+                    <div class="flex flex-col md:flex-row gap-8">
+                        <div class="md:w-1/2">
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center h-80" id="upload-area">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                                <p class="mt-4 text-sm text-gray-600">Drag and drop your medical image here or</p>
+                                <button type="button" class="mt-2 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white gradient-bg hover:opacity-90" id="upload-btn">
+                                    Browse Files
+                                </button>
+                                <input type="file" id="file-input" class="hidden" accept="image/*">
+                                <p class="mt-2 text-xs text-gray-500">Supported formats: JPEG, PNG</p>
+                            </div>
+                            
+                            <div class="mt-6">
+                                <h3 class="text-lg font-medium text-gray-900">Image Information</h3>
+                                <div class="mt-2 bg-white p-4 rounded-md shadow-sm">
+                                    <div class="grid grid-cols-2 gap-4" id="image-info">
+                                        <div class="text-sm">
+                                            <span class="text-gray-500">File Name:</span>
+                                            <span class="ml-2 text-gray-900" id="file-name">-</span>
+                                        </div>
+                                        <div class="text-sm">
+                                            <span class="text-gray-500">File Size:</span>
+                                            <span class="ml-2 text-gray-900" id="file-size">-</span>
+                                        </div>
+                                        <div class="text-sm">
+                                            <span class="text-gray-500">Dimensions:</span>
+                                            <span class="ml-2 text-gray-900" id="dimensions">-</span>
+                                        </div>
+                                        <div class="text-sm">
+                                            <span class="text-gray-500">Type:</span>
+                                            <span class="ml-2 text-gray-900" id="file-type">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="md:w-1/2 mt-8 md:mt-0">
+                            <div class="bg-white p-4 rounded-md shadow-sm">
+                                <div class="flex border-b">
+                                    <button class="px-4 py-2 text-sm font-medium tab-active" id="tab-results">Results</button>
+                                    <button class="px-4 py-2 text-sm font-medium text-gray-500" id="tab-heatmap">Heatmap</button>
+                                </div>
+                                
+                                <div class="mt-4" id="results-content">
+                                    <div class="flex items-center justify-center h-64 bg-gray-100 rounded-md" id="result-placeholder">
+                                        <p class="text-gray-500 text-sm">Upload an image to see results</p>
+                                    </div>
+                                    
+                                    <div class="hidden" id="results-data">
+                                        <div class="relative">
+                                            <img id="result-image" class="w-full h-64 object-contain rounded-md" src="" alt="Result">
+                                            <div id="heatmap-overlay" class="heatmap-overlay hidden"></div>
+                                        </div>
+                                        
+                                        <div class="mt-6">
+                                            <h4 class="text-md font-medium text-gray-900">Analysis Results</h4>
+                                            <div class="mt-2 space-y-4">
+                                                <div>
+                                                    <div class="flex justify-between">
+                                                        <span class="text-sm font-medium text-gray-700">Anomaly Detected</span>
+                                                        <span class="text-sm font-medium text-red-600" id="anomaly-result">Yes</span>
+                                                    </div>
+                                                    <div class="mt-1 w-full bg-gray-200 rounded-full h-2">
+                                                        <div class="bg-red-600 h-2 rounded-full" id="anomaly-confidence" style="width: 85%"></div>
+                                                    </div>
+                                                    <div class="flex justify-between text-xs text-gray-500">
+                                                        <span>Confidence</span>
+                                                        <span id="confidence-value">85%</span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div>
+                                                    <span class="text-sm font-medium text-gray-700">Classification</span>
+                                                    <div class="mt-1 flex items-center space-x-2">
+                                                        <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full" id="classification-primary">Glioma</span>
+                                                        <span class="px-2 py-1 text-xs font-medium bg-blue-50 text-blue-600 rounded-full" id="classification-secondary">Brain Tumor</span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div>
+                                                    <span class="text-sm font-medium text-gray-700">Location</span>
+                                                    <p class="mt-1 text-sm text-gray-600" id="anomaly-location">Frontal lobe, right hemisphere</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4 hidden" id="heatmap-content">
+                                    <div class="flex items-center justify-center h-64 bg-gray-100 rounded-md" id="heatmap-placeholder">
+                                        <p class="text-gray-500 text-sm">Upload an image to see heatmap</p>
+                                    </div>
+                                    
+                                    <div class="hidden" id="heatmap-data">
+                                        <div class="relative">
+                                            <img id="heatmap-image" class="w-full h-64 object-contain rounded-md" src="" alt="Heatmap">
+                                        </div>
+                                        
+                                        <div class="mt-4">
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-sm font-medium text-gray-700">Heatmap Intensity</span>
+                                                <div class="flex items-center">
+                                                    <input type="range" min="0" max="100" value="70" class="w-32" id="heatmap-intensity">
+                                                    <span class="ml-2 text-xs text-gray-500" id="intensity-value">70%</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mt-4 flex items-center">
+                                                <div class="w-full h-2 bg-gradient-to-r from-blue-500 via-yellow-500 to-red-500 rounded-full"></div>
+                                                <div class="ml-2 grid grid-cols-3 w-full text-xs text-gray-500">
+                                                    <span>Low</span>
+                                                    <span class="text-center">Medium</span>
+                                                    <span class="text-right">High</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-6 flex justify-end">
+                                    <button type="button" class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 mr-3" id="reset-btn" disabled>
+                                        Reset
+                                    </button>
+                                    <button type="button" class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white gradient-bg hover:opacity-90" id="analyze-btn" disabled>
+                                        Analyze Image
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-gray-900">About MedAnomNet</h2>
+                <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+                    Our hybrid deep learning model is designed to assist medical professionals in detecting anomalies in various medical imaging formats.
+                </p>
+            </div>
+            
+            <div class="mt-16">
+                <h3 class="text-xl font-medium text-gray-900">Model Architecture</h3>
+                <div class="mt-6 bg-white p-6 rounded-lg shadow-md">
+                    <div class="overflow-hidden">
+                        <svg class="w-full" viewBox="0 0 800 250" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Input -->
+                            <rect x="50" y="70" width="80" height="60" rx="5" fill="#bfdbfe" stroke="#3b82f6" stroke-width="2"/>
+                            <text x="90" y="105" text-anchor="middle" font-size="12" fill="#1e40af">Input</text>
+                            
+                            <!-- Arrow -->
+                            <line x1="130" y1="100" x2="170" y2="100" stroke="#64748b" stroke-width="2"/>
+                            <polygon points="170,100 160,95 160,105" fill="#64748b"/>
+                            
+                            <!-- Preprocessing -->
+                            <rect x="170" y="70" width="100" height="70" rx="5" fill="#ddd6fe" stroke="#8b5cf6" stroke-width="2"/>
+                            <text x="220" y="105" text-anchor="middle" font-size="12" fill="#5b21b6">Preprocessing</text>
+                            <text x="220" y="120" text-anchor="middle" font-size="9" fill="#5b21b6">Resize, Normalize</text>
+                            <text x="220" y="132" text-anchor="middle" font-size="9" fill="#5b21b6">Edge Detection</text>
+                            
+                            <!-- Arrow -->
+                            <line x1="270" y1="100" x2="310" y2="100" stroke="#64748b" stroke-width="2"/>
+                            <polygon points="310,100 300,95 300,105" fill="#64748b"/>
+                            
+                            <!-- ResNet-50 -->
+                            <rect x="310" y="70" width="100" height="60" rx="5" fill="#fecdd3" stroke="#f43f5e" stroke-width="2"/>
+                            <text x="360" y="105" text-anchor="middle" font-size="12" fill="#be123c">ResNet-50</text>
+                            <text x="360" y="120" text-anchor="middle" font-size="9" fill="#be123c">Feature Extraction</text>
+                            
+                            <!-- Arrow to AAE -->
+                            <line x1="410" y1="80" x2="450" y2="60" stroke="#64748b" stroke-width="2"/>
+                            <polygon points="450,60 440,55 440,65" fill="#64748b"/>
+                            
+                            <!-- Arrow to Classifier -->
+                            <line x1="410" y1="120" x2="450" y2="140" stroke="#64748b" stroke-width="2"/>
+                            <polygon points="450,140 440,135 440,145" fill="#64748b"/>
+                            
+                            <!-- AAE -->
+                            <rect x="450" y="30" width="100" height="60" rx="5" fill="#d9f99d" stroke="#84cc16" stroke-width="2"/>
+                            <text x="500" y="60" text-anchor="middle" font-size="12" fill="#3f6212">Adversarial</text>
+                            <text x="500" y="75" text-anchor="middle" font-size="12" fill="#3f6212">Autoencoder</text>
+                            
+                            <!-- Classifier -->
+                            <rect x="450" y="110" width="100" height="60" rx="5" fill="#fed7aa" stroke="#f97316" stroke-width="2"/>
+                            <text x="500" y="145" text-anchor="middle" font-size="12" fill="#9a3412">Disease</text>
+                            <text x="500" y="160" text-anchor="middle" font-size="12" fill="#9a3412">Classifier</text>
+                            
+                            <!-- Arrow from AAE -->
+                            <line x1="550" y1="60" x2="590" y2="80" stroke="#64748b" stroke-width="2"/>
+                            <polygon points="590,80 580,75 580,85" fill="#64748b"/>
+                            
+                            <!-- Arrow from Classifier -->
+                            <line x1="550" y1="140" x2="590" y2="120" stroke="#64748b" stroke-width="2"/>
+                            <polygon points="590,120 580,115 580,125" fill="#64748b"/>
+                            
+                            <!-- Output -->
+                            <rect x="590" y="70" width="100" height="60" rx="5" fill="#a5f3fc" stroke="#06b6d4" stroke-width="2"/>
+                            <text x="640" y="95" text-anchor="middle" font-size="12" fill="#0e7490">Results &</text>
+                            <text x="640" y="110" text-anchor="middle" font-size="12" fill="#0e7490">Visualization</text>
+                            
+                            <!-- Legend -->
+                            <rect x="50" y="190" width="700" height="50" rx="5" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1"/>
+                            <text x="400" y="210" text-anchor="middle" font-size="14" font-weight="bold" fill="#475569">Supported Diseases:</text>
+                            <text x="400" y="230" text-anchor="middle" font-size="12" fill="#475569">Glioma • Meningioma • Pituitary Tumors • COVID-19 • Pneumonia</text>
+                        </svg>
+                    </div>
+                    <p class="mt-4 text-sm text-gray-600">
+                        MedAnomNet uses a hybrid pipeline that includes preprocessing (resizing, normalization, edge detection), followed by feature extraction using a frozen ResNet-50. Features from intermediate layers are fused and passed to an adversarial autoencoder for anomaly detection. A classifier parallelly predicts disease types. Heatmaps highlight abnormal regions, aiding medical professionals in decision-making.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="mt-12 grid gap-8 md:grid-cols-2">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-medium text-gray-900">Performance Metrics</h3>
+                    <div class="mt-4 space-y-4">
+                        <div>
+                            <div class="flex justify-between">
+                                <span class="text-sm font-medium text-gray-700">Accuracy</span>
+                                <span class="text-sm font-medium text-gray-900">93.8%</span>
+                            </div>
+                            <div class="mt-1 w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-600 h-2 rounded-full" style="width: 93.8%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between">
+                                <span class="text-sm font-medium text-gray-700">Sensitivity</span>
+                                <span class="text-sm font-medium text-gray-900">91.5%</span>
+                            </div>
+                            <div class="mt-1 w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-600 h-2 rounded-full" style="width: 91.5%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between">
+                                <span class="text-sm font-medium text-gray-700">Specificity</span>
+                                <span class="text-sm font-medium text-gray-900">95.2%</span>
+                            </div>
+                            <div class="mt-1 w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-600 h-2 rounded-full" style="width: 95.2%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between">
+                                <span class="text-sm font-medium text-gray-700">F1 Score</span>
+                                <span class="text-sm font-medium text-gray-900">92.7%</span>
+                            </div>
+                            <div class="mt-1 w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-600 h-2 rounded-full" style="width: 92.7%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-medium text-gray-900">Supported Organs</h3>
+                    <div class="mt-4 grid grid-cols-2 gap-4">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="ml-2 text-sm text-gray-700">Brain </span>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="ml-2 text-sm text-gray-700">Liver </span>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="ml-2 text-sm text-gray-700">Chest </span>
+                        </div>
+                    </div>
+                    
+                    <h3 class="mt-6 text-xl font-medium text-gray-900">Detectable Conditions</h3>
+                    <div class="mt-4 grid grid-cols-2 gap-4">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="ml-2 text-sm text-gray-700">Glioma</span>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="ml-2 text-sm text-gray-700">Meningioma</span>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="ml-2 text-sm text-gray-700">Pituitary Tumors</span>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="ml-2 text-sm text-gray-700">COVID-19</span>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="ml-2 text-sm text-gray-700">Pneumonia</span>
+                        </div>
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="ml-2 text-sm text-gray-700">Liver tumors</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-12">
+                <h3 class="text-xl font-medium text-gray-900">Our Team</h3>
+                <div class="mt-6 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                        <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <h4 class="mt-4 text-lg font-medium text-gray-900">Sreedutt Ram J</h4>
+                        <p class="mt-1 text-xs text-gray-500">amenu4eac21067@am.students.amrita.edu</p>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                        <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <h4 class="mt-4 text-lg font-medium text-gray-900">Nikhil Rajiv</h4>
+                        <p class="mt-1 text-xs text-gray-500">amenu4eac21055@am.students.amrita.edu</p>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                        <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <h4 class="mt-4 text-lg font-medium text-gray-900">Sooraj S Nair</h4>
+                        <p class="mt-1 text-xs text-gray-500">amenu4eac21065@am.students.amrita.edu</p>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                        <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <h4 class="mt-4 text-lg font-medium text-gray-900">Sidharth P</h4>
+                        <p class="mt-1 text-xs text-gray-500">amenu4eac21063@am.students.amrita.edu</p>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                        <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-green-100 text-green-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <h4 class="mt-4 text-lg font-medium text-gray-900">Ragesh Rajan</h4>
+                        <p class="mt-1 text-xs text-gray-600">Mentor</p>
+                        <p class="mt-1 text-xs text-gray-500">rageshrm@am.amrita.edu</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-gray-900">Contact Us</h2>
+                <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+                    Have questions about MedAnomNet? Our team is here to help you with any inquiries.
+                </p>
+            </div>
+            
+            <div class="mt-12 grid gap-8 md:grid-cols-2">
+                <div class="bg-gray-50 p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-medium text-gray-900">Send Us a Message</h3>
+                    <form class="mt-6 space-y-6">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+                            <input type="text" id="name" name="name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
+                        </div>
+                        
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                            <input type="email" id="email" name="email" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
+                        </div>
+                        
+                        <div>
+                            <label for="subject" class="block text-sm font-medium text-gray-700">Subject</label>
+                            <select id="subject" name="subject" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
+                                <option value="">Select a subject</option>
+                                <option value="general">General Inquiry</option>
+                                <option value="technical">Technical Support</option>
+                                <option value="research">Research Collaboration</option>
+                                <option value="feedback">Feedback</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label for="message" class="block text-sm font-medium text-gray-700">Message</label>
+                            <textarea id="message" name="message" rows="4" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"></textarea>
+                        </div>
+                        
+                        <div>
+                            <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white gradient-bg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Send Message
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div>
+                    <div class="bg-gray-50 p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-medium text-gray-900">Contact Information</h3>
+                        <div class="mt-6 space-y-4">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3 text-sm text-gray-600">
+                                    <p>amenu4eac21067@amrita.edu</p>
+                                    <p class="mt-1">For general inquiries and information</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3 text-sm text-gray-600">
+                                    <p>Department of Electronics and Communication Engineering</p>
+                                    <p>Amrita Vishwa Vidyapeetham</p>
+                                    <p>Amritapuri Campus, Kerala, India</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 bg-gray-50 p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-medium text-gray-900">Research Publications</h3>
+                        <div class="mt-4">
+                            <p class="text-sm text-gray-600">
+                                Our research on MedAnomNet is currently under review. Please check back later for publication details or contact us for more information about our methodology and results.
+                            </p>
+                            <div class="mt-4 flex space-x-6">
+                                <a href="#" class="text-gray-400 hover:text-gray-500">
+                                    <span class="sr-only">GitHub</span>
+                                    <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+                                    </svg>
+                                </a>
+                                <a href="#" class="text-gray-400 hover:text-gray-500">
+                                    <span class="sr-only">ResearchGate</span>
+                                    <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M19.586 0c-.818 0-1.508.19-2.073.565-.563.377-.97.936-1.213 1.68a3.193 3.193 0 0 0-.112.437 8.365 8.365 0 0 0-.078.53 9 9 0 0 0-.05.727c-.01.282-.013.621-.013 1.016a31.121 31.121 0 0 0 .014 1.017 9 9 0 0 0 .05.727 7.946 7.946 0 0 0 .077.53h-.005a3.334 3.334 0 0 0 .113.438c.245.743.65 1.303 1.214 1.68.565.376 1.256.564 2.075.564.8 0 1.536-.213 2.105-.603.57-.39.94-.916 1.175-1.65.076-.235.135-.558.177-.93a10.9 10.9 0 0 0 .043-1.207v-.82c0-.095-.047-.142-.14-.142h-3.064c-.094 0-.14.047-.14.141v.956c0 .094.046.14.14.14h1.666c.056 0 .084.03.084.086 0 .36 0 .62-.036.865-.038.244-.1.447-.147.606-.108.385-.348.664-.638.876-.29.212-.738.35-1.227.35-.545 0-.901-.15-1.21-.353-.306-.203-.517-.454-.67-.915-.153-.46-.23-1.125-.23-1.993 0-.817.077-1.436.23-1.895.153-.46.363-.777.67-.981.308-.204.664-.296 1.209-.296.713 0 1.177.2 1.4.554.224.355.376.926.376 1.681 0 .094.047.141.141.141h1.267c.094 0 .14-.047.14-.14 0-1.265-.326-2.176-.984-2.811C21.166.312 20.249 0 19.586 0zM2.13 6.039c-.942 0-1.417.015-1.417.015-.094 0-.141.046-.141.14v11.698c0 .094.047.141.141.141h1.172c.094 0 .14-.047.14-.14v-3.99c0-.095.047-.142.142-.142h1.456c.939 0 1.683-.293 2.235-.914.55-.62.813-1.39.813-2.39 0-1.082-.241-1.79-.778-2.212-.538-.42-1.344-.206-2.495-.206H2.13zm.282 1.128h.97c.55 0 .921.062 1.122.226.2.164.301.525.301 1.084 0 .56-.101.972-.3 1.182-.2.21-.572.296-1.123.296h-.97c-.094 0-.14-.047-.14-.14V7.308c0-.094.046-.141.14-.141zm6.37 3.192c-.843 0-1.506.257-1.999.814-.492.557-.737 1.292-.737 2.206 0 .961.226 1.707.676 2.239.45.532 1.113.798 1.998.798.399 0 .764-.06 1.095-.183.33-.123.614-.304.852-.543.237-.24.423-.534.558-.889a3.67 3.67 0 0 0 .2-1.248c0-.868-.25-1.575-.647-2.103-.398-.527-.993-.79-1.996-.79zm-.023 1.073c.3 0 .521.062.732.227.21.164.362.362.463.612.101.25.16.562.16.889 0 .52-.123.91-.345 1.199-.223.29-.5.407-.93.407-.3 0-.534-.072-.733-.227-.198-.155-.337-.365-.438-.615-.101-.25-.151-.562-.151-.889 0-.52.112-.924.335-1.213.223-.29.512-.39.907-.39zM2.129 13.958c-.094 0-.14.047-.14.141v3.793c0 .095.046.142.14.142h1.172c.094 0 .14-.047.14-.142v-3.793c0-.094-.046-.14-.14-.14H2.13z"/>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <div class="flex items-center">
+                        <svg class="h-8 w-8 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19.5 8.25l-7.5 7.5-7.5-7.5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span class="ml-2 text-xl font-bold">MedAnomNet</span>
+                    </div>
+                    <p class="mt-2 text-sm text-gray-300">
+                        A Hybrid Multi-Modal Anomaly Detection Approach for medical imaging analysis.
+                    </p>
+                </div>
+                
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Quick Links</h3>
+                    <ul class="mt-4 space-y-2">
+                        <li><a href="#home" class="text-base text-gray-300 hover:text-white">Home</a></li>
+                        <li><a href="#try-it" class="text-base text-gray-300 hover:text-white">Try It Now</a></li>
+                        <li><a href="#about" class="text-base text-gray-300 hover:text-white">About</a></li>
+                        <li><a href="#contact" class="text-base text-gray-300 hover:text-white">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Affiliation</h3>
+                    <p class="mt-4 text-base text-gray-300">
+                        Department of Electronics and Communication Engineering<br>
+                        Amrita Vishwa Vidyapeetham<br>
+                        Amritapuri Campus, Kerala, India
+                    </p>
+                </div>
+            </div>
+            
+            <div class="mt-12 border-t border-gray-700 pt-8 flex flex-col md:flex-row justify-between">
+                <p class="text-base text-gray-400">
+                    &copy; 2025 MedAnomNet. All rights reserved.
+                </p>
+                <p class="mt-4 md:mt-0 text-base text-gray-400">
+                    This is a research project. Not for clinical use.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        const mobileMenuButton = document.querySelector('.mobile-menu-button');
+        const mobileMenu = document.querySelector('.mobile-menu');
+        
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // Navigation highlighting
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('nav a');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('text-blue-600');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('text-blue-600');
+                }
+            });
+        });
+        
+        // Tab switching
+        const tabResults = document.getElementById('tab-results');
+        const tabHeatmap = document.getElementById('tab-heatmap');
+        const resultsContent = document.getElementById('results-content');
+        const heatmapContent = document.getElementById('heatmap-content');
+        
+        tabResults.addEventListener('click', () => {
+            tabResults.classList.add('tab-active');
+            tabResults.classList.remove('text-gray-500');
+            tabHeatmap.classList.remove('tab-active');
+            tabHeatmap.classList.add('text-gray-500');
+            resultsContent.classList.remove('hidden');
+            heatmapContent.classList.add('hidden');
+        });
+        
+        tabHeatmap.addEventListener('click', () => {
+            tabHeatmap.classList.add('tab-active');
+            tabHeatmap.classList.remove('text-gray-500');
+            tabResults.classList.remove('tab-active');
+            tabResults.classList.add('text-gray-500');
+            heatmapContent.classList.remove('hidden');
+            resultsContent.classList.add('hidden');
+        });
+        
+        // File upload handling
+        const fileInput = document.getElementById('file-input');
+        const uploadBtn = document.getElementById('upload-btn');
+        const uploadArea = document.getElementById('upload-area');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const fileName = document.getElementById('file-name');
+        const fileSize = document.getElementById('file-size');
+        const dimensions = document.getElementById('dimensions');
+        const fileType = document.getElementById('file-type');
+        const resultImage = document.getElementById('result-image');
+        const heatmapImage = document.getElementById('heatmap-image');
+        const resultPlaceholder = document.getElementById('result-placeholder');
+        const heatmapPlaceholder = document.getElementById('heatmap-placeholder');
+        const resultsData = document.getElementById('results-data');
+        const heatmapData = document.getElementById('heatmap-data');
+        const heatmapOverlay = document.getElementById('heatmap-overlay');
+        const heatmapIntensity = document.getElementById('heatmap-intensity');
+        const intensityValue = document.getElementById('intensity-value');
+        
+        uploadBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('border-blue-500');
+            uploadArea.classList.add('bg-blue-50');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('border-blue-500');
+            uploadArea.classList.remove('bg-blue-50');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('border-blue-500');
+            uploadArea.classList.remove('bg-blue-50');
+            
+            if (e.dataTransfer.files.length) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+        
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length) {
+                handleFile(fileInput.files[0]);
+            }
+        });
+        
+        function handleFile(file) {
+            // Display file info
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            fileType.textContent = file.type;
+            
+            // Create image preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    dimensions.textContent = `${img.width} x ${img.height}`;
+                    resultImage.src = e.target.result;
+                    heatmapImage.src = e.target.result;
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+            
+            // Enable analyze button
+            analyzeBtn.disabled = false;
+            resetBtn.disabled = false;
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' bytes';
+            else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+            else return (bytes / 1048576).toFixed(1) + ' MB';
+        }
+        
+        // Analyze button functionality
+        analyzeBtn.addEventListener('click', () => {
+            // Show loading state
+            analyzeBtn.disabled = true;
+            analyzeBtn.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Analyzing...
+            `;
+            
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('image', file);
+
+            fetch('/analyze', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                resultPlaceholder.classList.add('hidden');
+                heatmapPlaceholder.classList.add('hidden');
+                resultsData.classList.remove('hidden');
+                heatmapData.classList.remove('hidden');
+
+                // Set images
+                resultImage.src = data.filename;
+                heatmapImage.src = data.heatmap_path;
+
+                // Update result text
+                document.getElementById('anomaly-result').textContent = data.anomaly_detected ? 'Yes' : 'No';
+                document.getElementById('anomaly-confidence').style.width = `${data.confidence}%`;
+                document.getElementById('confidence-value').textContent = `${data.confidence}%`;
+                document.getElementById('classification-primary').textContent = data.classification;
+                document.getElementById('classification-secondary').textContent = getClassificationGroup(data.classification);
+                document.getElementById('anomaly-location').textContent = data.anomaly_location || 'Not specified';
+
+                
+                analyzeBtn.disabled = false;
+                analyzeBtn.innerHTML = 'Analyze Image';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to analyze image.');
+                analyzeBtn.disabled = false;
+                analyzeBtn.innerHTML = 'Analyze Image';
+            });
+
+        });
+        
+        // Reset button functionality
+        resetBtn.addEventListener('click', () => {
+            // Reset file input
+            fileInput.value = '';
+            
+            // Reset file info
+            fileName.textContent = '-';
+            fileSize.textContent = '-';
+            dimensions.textContent = '-';
+            fileType.textContent = '-';
+            
+            // Hide results
+            resultPlaceholder.classList.remove('hidden');
+            heatmapPlaceholder.classList.remove('hidden');
+            resultsData.classList.add('hidden');
+            heatmapData.classList.add('hidden');
+            
+            // Disable buttons
+            analyzeBtn.disabled = true;
+            resetBtn.disabled = true;
+        });
+        
+        // Heatmap intensity slider
+        heatmapIntensity.addEventListener('input', () => {
+            intensityValue.textContent = `${heatmapIntensity.value}%`;
+            if (heatmapOverlay) {
+                heatmapOverlay.style.opacity = heatmapIntensity.value / 100;
+            }
+        });
+
+        function getClassificationGroup(label) {
+            const brain = ['glioma_tumor', 'meningioma_tumor', 'no_tumor','pituitary_tumor']
+            ;
+            const chest = ['covid19', 'lung_opacity', 'normal', 'viral_pneumonia']
+
+            const liver = [ 'liver_health', 'liver_tumor']            ;
+            if (brain.includes(label)) return 'Brain ';
+            if (chest.includes(label)) return 'Chest ';
+            if (liver.includes(label)) return 'Liver ';
+            return 'Unknown';
+        }
+
+   
+</script>
