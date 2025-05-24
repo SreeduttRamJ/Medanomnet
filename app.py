@@ -1,39 +1,38 @@
-import streamlit as st
-from PIL import Image
+from flask import Flask, render_template, request, jsonify
+from werkzeug.utils import secure_filename
 import os
 from utils.inference import process_image
 
-st.set_page_config(page_title="MedAnomNet - Anomaly Detection", layout="centered")
+app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
 
-st.title("🧠 MedAnomNet")
-st.markdown("Upload an image (Brain MRI, Liver CT, or Chest X-ray) for anomaly detection and visualization.")
+@app.route('/')
+def index():
+    return render_template('website.html')
 
-uploaded_file = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png"])
+@app.route('/analyze', methods=['POST'])
+def analyze():
+    if 'image' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400
 
-if uploaded_file:
-    os.makedirs("static/uploads", exist_ok=True)
-    filepath = os.path.join("static/uploads", uploaded_file.name)
-    with open(filepath, "wb") as f:
-        f.write(uploaded_file.getbuffer())
-
-    st.image(filepath, caption="Uploaded Image", use_column_width=True)
+    file = request.files['image']
+    filename = secure_filename(file.filename)
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    file.save(filepath)
 
     result = process_image(filepath)
+    return jsonify(result)
 
-    st.subheader("🔍 Analysis Result")
-    st.write(f"**Classification:** {result['classification']}")
-    st.write(f"**Confidence:** {result['confidence']}%")
-    st.write(f"**Anomaly Detected:** {'✅ Yes' if result['anomaly_detected'] else '❌ No'}")
 
-    if result['anomaly_detected']:
-        st.image(result['heatmap_path'], caption="🔥 Anomaly Heatmap", use_column_width=True)
+@app.route('/submit', methods=['POST'])
+def submit():
+    name = request.form.get('name')
+    email = request.form.get('email')
+    message = request.form.get('message')
+    print(f"Received: {name}, {email}, {message}")
+    return "Form submitted successfully!"
 
-# Optional: Contact form (replaces your /submit route)
-with st.expander("📨 Contact Us"):
-    with st.form("contact_form"):
-        name = st.text_input("Name")
-        email = st.text_input("Email")
-        message = st.text_area("Message")
-        submitted = st.form_submit_button("Submit")
-        if submitted:
-            st.success(f"Thanks {name}, your message has been received.")
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
